@@ -13,28 +13,18 @@ def cli():
 def transactions(days, up_api_token):
     """Import your Up transactions into YNAB."""
 
+    out = pe.EchoManager()
+    out.section(f'Checking transactions from the last {days} days')
+
+    out.start_task('Fetching transactions from Up...')
     up_client = up_api.UpClient(up_api_token)
-
-    click.echo(f'Checking transactions from the last {pe.key(f"{days} days")}:')
-
-    fetching_echo = pe.EchoInProgress('    Fetching transactions from Up...').start()
     tx_count = len(up_client.get_transactions())
-    fetching_echo.finish(f'    Fetched the {pe.up(f"{tx_count} Up transactions")}.')
+    out.task_success(f'Fetched the {tx_count} Up transactions')
+
+    out.end_section()
 
     # TODO
-    click.echo(f'    Fetched the {pe.ynab(f"{tx_count} previously imported YNAB transactions")}.')
-    
-    # TODO
-    click.echo(f'    There are {pe.key("13 new transactions")} to be imported.')
-
-    click.echo()
-
-    click.echo(f'Imported transactions to YNAB.')
-
-    click.echo()
-
-    # TODO
-    click.echo(pe.success('Imported 13 new transactions in 2.56 seconds.'))
+    out.success('Imported 13 new transactions in 2.56 seconds.')
 
 
 cli.add_command(transactions)
