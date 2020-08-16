@@ -52,7 +52,7 @@ class YNABClient:
     def create_transactions(self, account_id, transactions):
         """Create the YNABTransactions in the account with the specified ID.
         
-        Returns a 2-tuple of (created_tx_ids, duplicate_import_ids).
+        Returns a list of IDs that had already been imported.
         """
         transactions_data = [
             {**tx._asdict(), "account_id": account_id} for tx in transactions
@@ -65,4 +65,4 @@ class YNABClient:
         )
         r.raise_for_status()
         json_data = r.json()["data"]
-        return (json_data["transaction_ids"], json_data["duplicate_import_ids"])
+        return json_data["duplicate_import_ids"]

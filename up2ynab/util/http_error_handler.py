@@ -39,7 +39,7 @@ def handle_http_errors(f):
                 ctx.exit(2)
             else:
                 out.fatal(
-                    f"Accessing the API at the following URL resulted in an unexpected HTTP {code} error:"
+                    f"Accessing the API at the following URL resulted in an unexpected HTTP {code} error:",
                     f"  *{e.request.method}* `{e.response.url}`",
                 )
                 ctx.exit(2)

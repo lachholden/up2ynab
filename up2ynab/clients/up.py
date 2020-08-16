@@ -27,10 +27,27 @@ class UpClient:
         # if it's neither 200 nor 401, raise it as an error
         r.raise_for_status()
 
+    def get_transactional_account_id(self):
+        r = self.up_get("/accounts")
+        r.raise_for_status()
+        json_data = r.json()
+        ids = [
+            acc["id"]
+            for acc in json_data["data"]
+            if acc["attributes"]["accountType"] == "TRANSACTIONAL"
+        ]
+
+        if len(ids) != 1:
+            raise ValueError(f"found {len(ids)} transactional accounts, should be 1")
+
+        self.tx_acct_id = ids[0]
+
     def get_transactions(self):
         # TODO: calculate the real date
+        assert self.tx_acct_id is not None
         r = self.up_get(
-            "/transactions", params={"filter[since]": "2020-08-01T01:02:03+10:00"}
+            f"/accounts/{self.tx_acct_id}/transactions",
+            params={"filter[since]": "2020-08-01T01:02:03+10:00"},
         )
         r.raise_for_status()
 

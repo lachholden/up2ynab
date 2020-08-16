@@ -30,7 +30,7 @@ from up2ynab.util.http_error_handler import handle_http_errors
 @click.pass_context
 @handle_http_errors
 def transactions(ctx, days, ynab_account_name):
-    """Import your Up transactions into YNAB.
+    """Import your Up transactions (transactional account only) into YNAB.
     
     Make sure your API tokens are setup correctly! Recommended use is by setting the
     environment variables UP_API_TOKEN and YNAB_API_TOKEN. You can check they are
@@ -48,17 +48,25 @@ def transactions(ctx, days, ynab_account_name):
     start_time = time.perf_counter()
 
     out.section(f"Checking the last *{days} days* of transactions")
+    out.start_task("Fetching the Up transactional account ID...")
+    up_client = up_api.UpClient(ctx.obj["up_token"])
+    try:
+        up_client.get_transactional_account_id()
+    except ValueError:
+        out.task_error("More or less than 1 transactional account found.")
+        out.fatal("Couldn't determine the Up transactional account ID.")
+        sys.exit(2)
+    out.task_success("Fetched the Up transactional account ID.")
 
     out.start_task("Fetching transactions from Up...")
-    up_client = up_api.UpClient(ctx.obj["up_token"])
     transactions = up_client.get_transactions()
     tx_count = len(transactions)
     ynab_transactions = []
     for transaction in transactions:
         date = datetime.datetime.fromisoformat(transaction["attributes"]["createdAt"])
-        amount = transaction["attributes"]["amount"]["valueInBaseUnits"] * -10
+        amount = transaction["attributes"]["amount"]["valueInBaseUnits"] * 10
         payee_name = transaction["attributes"]["description"]
-        import_id = f"up:{transaction['id'].replace('-', '')}"
+        import_id = f"up0:{transaction['id'].replace('-', '')}"
         ynab_transactions.append(
             ynab_api.YNABTransaction(
                 date.date().isoformat(), amount, payee_name, import_id
@@ -79,13 +87,13 @@ def transactions(ctx, days, ynab_account_name):
 
     out.start_task("Uploading the transactions to YNAB...")
     ids = ynab_client.create_transactions(account_id, ynab_transactions)
-    out.task_success(f"Uploaded *{len(ids[0])} new transactions* to YNAB.")
-    out.comment(f"*{len(ids[1])} transactions* were previously imported.")
+    out.task_success(f"Uploaded *{tx_count-len(ids)} new transactions* to YNAB.")
+    out.comment(f"*{len(ids)} transactions* were previously imported.")
 
     out.end_section()
 
     time_delta = time.perf_counter() - start_time
 
     out.success(
-        f"Imported *{len(ids[0])} new transactions* in {time_delta:.2f} seconds."
+        f"Imported *{tx_count-len(ids)} new transactions* in {time_delta:.2f} seconds."
     )
