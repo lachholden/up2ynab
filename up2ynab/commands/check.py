@@ -79,15 +79,14 @@ def check(ctx):
     if up_authenticated is None or ynab_authenticated is None:
         out.error(
             "One or both of your API tokens were not provided.",
-            "Either use the --up-api-token/--ynab-api-token flags,",
-            "or set the UP_API_TOKEN/YNAB_API_TOKEN environment variables.",
+            "View `up2ynab check --help` for setup instructions.",
         )
         sys.exit(1)
     elif up_authenticated and ynab_authenticated:
         out.success("Both API tokens authenticated successfully - you're good to go!")
     else:
         out.warning(
-            "One or both of your API tokens are misconfigured.",
+            "One or both of your API tokens are incorrect.",
             "Fix them and run `up2ynab check` again.",
         )
         sys.exit(2)

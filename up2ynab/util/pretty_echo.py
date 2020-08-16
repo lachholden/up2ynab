@@ -30,10 +30,6 @@ def _style_warning(string):
     return click.style("! ", fg="yellow") + string
 
 
-def _style_fatal(string):
-    return click.style("✗ ", fg="bright_red") + click.style(string, fg="red")
-
-
 def _style_header(string,):
     return click.style("» ", fg="blue") + click.style(string, bold=True)
 
@@ -70,9 +66,9 @@ class EchoInProgress:
             f'\r{4*self.level*" "}{message: <{4*self.level + len(self.in_progress_message) + 11}}'
         )
 
-    def pause(self):
+    def cancel(self):
         self._stop()
-        click.echo(f'\r{4*self.level*" "}⠪ {self.in_progress_message}')
+        click.secho(f'\r{4*self.level*" "}◼︎ {self.in_progress_message}', fg="red")
 
 
 class EchoManager:
@@ -139,9 +135,7 @@ class EchoManager:
 
     def fatal(self, *message):
         if self.in_progress is not None:
-            self.in_progress.pause()
+            self.in_progress.cancel()
         self.current_level = 0
         click.echo()
-        click.echo(
-            self._format_message(_style_fatal(self._hanging_pad(2).join(message)))
-        )
+        self.error(*message)
