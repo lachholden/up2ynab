@@ -59,7 +59,9 @@ def transactions(ctx, days, ynab_account_name):
     out.task_success("Fetched the Up transactional account ID.")
 
     out.start_task("Fetching transactions from Up...")
-    transactions = up_client.get_transactions()
+    transactions = up_client.get_transactions(
+        datetime.datetime.now() - datetime.timedelta(days=days)
+    )
     tx_count = len(transactions)
     ynab_transactions = []
     for transaction in transactions:

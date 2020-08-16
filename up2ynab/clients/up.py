@@ -42,12 +42,11 @@ class UpClient:
 
         self.tx_acct_id = ids[0]
 
-    def get_transactions(self):
-        # TODO: calculate the real date
+    def get_transactions(self, since):
         assert self.tx_acct_id is not None
         r = self.up_get(
             f"/accounts/{self.tx_acct_id}/transactions",
-            params={"filter[since]": "2020-08-01T01:02:03+10:00"},
+            params={"filter[since]": since.strftime("%Y-%m-%dT%H:%M:%S+00:00")},
         )
         r.raise_for_status()
 
