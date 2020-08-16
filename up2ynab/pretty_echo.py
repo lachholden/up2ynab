@@ -2,18 +2,16 @@ import click
 import itertools
 import threading
 import time
+import re
 
 def _style_unimportant(string):
     return click.style(string, fg='white', dim=True)
 
-def _style_up(string):
-    return click.style(string, fg='bright_magenta', bold=True)
-
-def _style_ynab(string):
-    return click.style(string, fg='bright_blue', bold=True)
-
 def _style_highlight(string):
     return click.style(string, fg='yellow')
+
+def _style_preformatted(string):
+    return click.style(string, fg='cyan')
 
 def _style_success(string):
     return click.style('✓ ', fg='green') + string
@@ -65,13 +63,19 @@ class EchoInProgress:
 
 
 class EchoManager:
+    @staticmethod
+    def _format_message(string):
+        with_highlight = re.sub(r'\*(.+?)\*', lambda s: _style_highlight(s.group(1)), string)
+        with_preformat = re.sub(r'\`(.+?)\`', lambda s: _style_preformatted(s.group(1)), with_highlight)
+        return with_preformat
+    
     def __init__(self):
         self.current_level = 0
         self.in_progress = None
-    
-    def _level_echo(self, string):
-        click.echo(4*self.current_level*" " + string)
 
+    def _level_echo(self, string):
+        click.echo(4*self.current_level*" " + self._format_message(string))
+    
     def section(self, header):
         self._level_echo(_style_header(header))
         self.current_level += 1
@@ -89,13 +93,13 @@ class EchoManager:
     def task_success(self, message):
         if self.in_progress is None:
             raise RuntimeError('No task is currently in progress')
-        self.in_progress.finish(_style_success(message))
+        self.in_progress.finish(self._format_message(_style_success(message)))
         self.in_progress = None
     
     def task_error(self, message):
         if self.in_progress is None:
             raise RuntimeError('No task is currently in progress')
-        self.in_progress.finish(_style_error(message))
+        self.in_progress.finish(self._format_message(_style_error(message)))
         self.in_progress = None
     
     def success(self, message):
@@ -112,4 +116,4 @@ class EchoManager:
             self.in_progress.pause()
         self.current_level = 0
         click.echo()
-        click.echo(_style_fatal(message))
+        click.echo(self._format_message(_style_fatal(message)))

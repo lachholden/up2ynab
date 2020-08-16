@@ -27,7 +27,7 @@ def check(up_api_token):
         out.task_error('Your Up API token returned an authentication error')
     
     out.start_task('Checking your YNAB token...')
-    ynab_authenticated = True # TODO
+    ynab_authenticated = False # TODO
     if ynab_authenticated:
         out.task_success('Your YNAB API token is working')
     else:
@@ -38,7 +38,7 @@ def check(up_api_token):
     if up_authenticated and ynab_authenticated:
         out.success('Both API tokens authenticated successfully - you\'re good to go!')
     else:
-        out.warning('One or both of your API tokens are misconfigured - check them and try again')
+        out.warning('One or both of your API tokens are misconfigured - fix them and run `up2ynab check` again')
         sys.exit(1)
 
 @click.command()
@@ -48,7 +48,7 @@ def transactions(days, up_api_token):
     """Import your Up transactions into YNAB."""
 
     out = pe.EchoManager()
-    out.section(f'Checking transactions from the last {days} days')
+    out.section(f'Checking transactions from the last *{days} days*')
 
     out.start_task('Fetching transactions from Up...')
     try:
@@ -57,12 +57,12 @@ def transactions(days, up_api_token):
     except requests.exceptions.ConnectionError:
         out.fatal('Unable to connect to the Up API')
         sys.exit(2)
-    out.task_success(f'Fetched the {tx_count} transactions from Up')
+    out.task_success(f'Fetched the *{tx_count} transactions* from Up')
 
     out.end_section()
 
     # TODO
-    out.success('Imported 13 new transactions in 2.56 seconds.')
+    out.success('Imported *13 new transactions* in 2.56 seconds')
 
 
 cli.add_command(check)
