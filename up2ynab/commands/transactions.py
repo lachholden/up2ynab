@@ -5,7 +5,7 @@ import requests.exceptions
 
 import up2ynab.clients.up as up_api
 import up2ynab.clients.ynab as ynab_api
-import up2ynab.pretty_echo as pe
+from up2ynab.util.http_error_handler import handle_http_errors
 
 
 @click.command()
@@ -26,6 +26,7 @@ import up2ynab.pretty_echo as pe
     show_default=True,
 )
 @click.pass_context
+@handle_http_errors
 def transactions(ctx, days, ynab_account_name):
     """Import your Up transactions into YNAB.
     
@@ -40,7 +41,7 @@ def transactions(ctx, days, ynab_account_name):
       $ up2ynab check --help
     """
 
-    out = pe.EchoManager()
+    out = ctx.obj["echo_manager"]
     out.section(f"Checking the last *{days} days* of transactions")
 
     out.start_task("Fetching transactions from Up...")

@@ -5,11 +5,12 @@ import requests.exceptions
 
 import up2ynab.clients.up as up_api
 import up2ynab.clients.ynab as ynab_api
-import up2ynab.pretty_echo as pe
+from up2ynab.util.http_error_handler import handle_http_errors
 
 
 @click.command()
 @click.pass_context
+@handle_http_errors
 def check(ctx):
     """Check that your API tokens are configured correctly.
 
@@ -43,7 +44,7 @@ def check(ctx):
       $ up2ynab --up-api-token xxxx --ynab-api-token xxxx check
     """
 
-    out = pe.EchoManager()
+    out = ctx.obj["echo_manager"]
     out.section("Checking your API tokens")
 
     # Check the Up API token

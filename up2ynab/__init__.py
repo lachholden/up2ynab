@@ -1,6 +1,7 @@
 import click
 
 from up2ynab.commands import *
+from up2ynab.util.pretty_echo import EchoManager
 
 
 @click.group()
@@ -28,7 +29,11 @@ def cli(ctx, up_api_token, ynab_api_token):
 
     for details on the recommended way of configuration using environment variables.
     """
-    ctx.obj = {"up_token": up_api_token, "ynab_token": ynab_api_token}
+    ctx.obj = {
+        "up_token": up_api_token,
+        "ynab_token": ynab_api_token,
+        "echo_manager": EchoManager(),
+    }
 
 
 cli.add_command(check)
