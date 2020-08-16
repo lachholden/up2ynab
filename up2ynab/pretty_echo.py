@@ -18,6 +18,12 @@ def _style_highlight(string):
 def _style_success(string):
     return click.style('✓ ', fg='green') + string
 
+def _style_error(string):
+    return click.style('✗ ', fg='red') + string
+
+def _style_fatal(string):
+    return click.style('✗ ', fg='bright_red') + click.style(string, fg='red')
+
 def _style_header(string,):
     return click.style('» ', fg='blue') + click.style(string, bold=True)
 
@@ -49,6 +55,10 @@ class EchoInProgress:
     def finish(self, message):
         self._stop()
         click.echo(f'\r{4*self.level*" "}{message: <{4*self.level + len(self.in_progress_message) + 11}}')
+    
+    def pause(self):
+        self._stop()
+        click.echo(f'\r{4*self.level*" "}⠪ {self.in_progress_message}')
 
 
 class EchoManager:
@@ -79,5 +89,21 @@ class EchoManager:
         self.in_progress.finish(_style_success(message))
         self.in_progress = None
     
+    def task_error(self, message):
+        if self.in_progress is None:
+            raise RuntimeError('No task is currently in progress')
+        self.in_progress.finish(_style_error(message))
+        self.in_progress = None
+    
     def success(self, message):
         self._level_echo(_style_success(message))
+    
+    def error(self, message):
+        self._level_echo(_style_error(message))
+    
+    def fatal(self, message):
+        if self.in_progress is not None:
+            self.in_progress.pause()
+        self.current_level = 0
+        click.echo()
+        click.echo(_style_fatal(message))

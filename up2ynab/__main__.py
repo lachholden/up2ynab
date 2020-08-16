@@ -1,4 +1,7 @@
+import sys
+
 import click
+import requests.exceptions
 
 import up2ynab.up as up_api
 import up2ynab.pretty_echo as pe
@@ -17,9 +20,13 @@ def transactions(days, up_api_token):
     out.section(f'Checking transactions from the last {days} days')
 
     out.start_task('Fetching transactions from Up...')
-    up_client = up_api.UpClient(up_api_token)
-    tx_count = len(up_client.get_transactions())
-    out.task_success(f'Fetched the {tx_count} Up transactions')
+    try:
+        up_client = up_api.UpClient(up_api_token)
+        tx_count = len(up_client.get_transactions())
+    except requests.exceptions.ConnectionError:
+        out.fatal('Unable to connect to the Up API')
+        sys.exit(2)
+    out.task_success(f'Fetched the {tx_count} transactions from Up')
 
     out.end_section()
 
