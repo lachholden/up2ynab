@@ -1,4 +1,6 @@
 import sys
+import datetime
+import time
 
 import click
 import requests.exceptions
@@ -42,14 +44,29 @@ def transactions(ctx, days, ynab_account_name):
     """
 
     out = ctx.obj["echo_manager"]
+
+    start_time = time.perf_counter()
+
     out.section(f"Checking the last *{days} days* of transactions")
 
     out.start_task("Fetching transactions from Up...")
     up_client = up_api.UpClient(ctx.obj["up_token"])
-    tx_count = len(up_client.get_transactions())
+    transactions = up_client.get_transactions()
+    tx_count = len(transactions)
+    ynab_transactions = []
+    for transaction in transactions:
+        date = datetime.datetime.fromisoformat(transaction["attributes"]["createdAt"])
+        amount = transaction["attributes"]["amount"]["valueInBaseUnits"] * -10
+        payee_name = transaction["attributes"]["description"]
+        import_id = f"up:{transaction['id'].replace('-', '')}"
+        ynab_transactions.append(
+            ynab_api.YNABTransaction(
+                date.date().isoformat(), amount, payee_name, import_id
+            )
+        )
     out.task_success(f"Fetched the *{tx_count} transactions* from Up.")
 
-    out.start_task(f"Fetching the Up account ID in YNAB...")
+    out.start_task("Fetching the Up account ID in YNAB...")
     ynab_client = ynab_api.YNABClient(ctx.obj["ynab_token"])
     account_id = None
     try:
@@ -60,7 +77,15 @@ def transactions(ctx, days, ynab_account_name):
         out.fatal(f"Couldn't find the named Up account in YNAB.")
         sys.exit(2)
 
+    out.start_task("Uploading the transactions to YNAB...")
+    ids = ynab_client.create_transactions(account_id, ynab_transactions)
+    out.task_success(f"Uploaded *{len(ids[0])} new transactions* to YNAB.")
+    out.comment(f"*{len(ids[1])} transactions* were previously imported.")
+
     out.end_section()
 
-    # TODO
-    out.success("Imported *13 new transactions* in 2.56 seconds.")
+    time_delta = time.perf_counter() - start_time
+
+    out.success(
+        f"Imported *{len(ids[0])} new transactions* in {time_delta:.2f} seconds."
+    )

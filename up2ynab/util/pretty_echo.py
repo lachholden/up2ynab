@@ -30,6 +30,10 @@ def _style_warning(string):
     return click.style("! ", fg="yellow") + string
 
 
+def _style_info(string):
+    return click.style("› ", fg="bright_blue") + string
+
+
 def _style_header(string,):
     return click.style("» ", fg="blue") + click.style(string, bold=True)
 
@@ -100,28 +104,22 @@ class EchoManager:
         click.echo()
         self.current_level -= 1
 
-    def start_task(self, *message):
+    def start_task(self, message):
         if self.in_progress is not None:
             raise RuntimeError("Another task is already in progress")
-        self.in_progress = EchoInProgress(
-            self._hanging_pad(2).join(message), level=self.current_level
-        )
+        self.in_progress = EchoInProgress(message, level=self.current_level)
         self.in_progress.start()
 
-    def task_success(self, *message):
+    def task_success(self, message):
         if self.in_progress is None:
             raise RuntimeError("No task is currently in progress")
-        self.in_progress.finish(
-            self._format_message(_style_success(self._hanging_pad(2).join(message)))
-        )
+        self.in_progress.finish(self._format_message(_style_success(message)))
         self.in_progress = None
 
-    def task_error(self, *message):
+    def task_error(self, message):
         if self.in_progress is None:
             raise RuntimeError("No task is currently in progress")
-        self.in_progress.finish(
-            self._format_message(_style_error(self._hanging_pad(2).join(message)))
-        )
+        self.in_progress.finish(self._format_message(_style_error(message)))
         self.in_progress = None
 
     def success(self, *message):
@@ -132,6 +130,14 @@ class EchoManager:
 
     def warning(self, *message):
         self._level_echo(_style_warning(self._hanging_pad(2).join(message)))
+
+    def info(self, *message):
+        self._level_echo(_style_info(self._hanging_pad(2).join(message)))
+
+    def comment(self, *message):
+        """Info indented by two spaces, intended to comment on the immediately
+        preceeding task/message."""
+        self._level_echo("  " + _style_info(self._hanging_pad(4).join(message)))
 
     def fatal(self, *message):
         if self.in_progress is not None:
