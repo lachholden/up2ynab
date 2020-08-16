@@ -26,18 +26,18 @@ def transactions(days, up_api_token):
     """Import your Up transactions into YNAB."""
 
     out = pe.EchoManager()
-    out.section(f"Checking transactions from the last *{days} days*")
+    out.section(f"Checking the last *{days} days* of transactions")
 
     out.start_task("Fetching transactions from Up...")
     try:
         up_client = up_api.UpClient(up_api_token)
         tx_count = len(up_client.get_transactions())
     except requests.exceptions.ConnectionError:
-        out.fatal("Unable to connect to the Up API")
+        out.fatal("Unable to connect to the Up API.")
         sys.exit(2)
-    out.task_success(f"Fetched the *{tx_count} transactions* from Up")
+    out.task_success(f"Fetched the *{tx_count} transactions* from Up.")
 
     out.end_section()
 
     # TODO
-    out.success("Imported *13 new transactions* in 2.56 seconds")
+    out.success("Imported *13 new transactions* in 2.56 seconds.")

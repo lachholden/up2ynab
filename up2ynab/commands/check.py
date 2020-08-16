@@ -34,11 +34,11 @@ def check(up_api_token, ynab_api_token):
         up_client = up_api.UpClient(up_api_token)
         up_authenticated = up_client.is_authenticated()
         if up_authenticated:
-            out.task_success("Your Up API token is working")
+            out.task_success("Your Up API token is working.")
         else:
-            out.task_error("Your Up API token returned an authentication error")
+            out.task_error("Your Up API token returned an authentication error.")
     else:
-        out.task_error("No Up API token was provided")
+        out.task_error("No Up API token was provided.")
 
     # Check the YNAB API token
     ynab_authenticated = None
@@ -47,11 +47,11 @@ def check(up_api_token, ynab_api_token):
         ynab_client = ynab_api.YNABClient(ynab_api_token)
         ynab_authenticated = ynab_client.is_authenticated()
         if ynab_authenticated:
-            out.task_success("Your YNAB API token is working")
+            out.task_success("Your YNAB API token is working.")
         else:
-            out.task_error("Your YNAB API token returned an authentication error")
+            out.task_error("Your YNAB API token returned an authentication error.")
     else:
-        out.task_error("No YNAB API token was provided")
+        out.task_error("No YNAB API token was provided.")
 
     out.end_section()
 
@@ -68,6 +68,6 @@ def check(up_api_token, ynab_api_token):
         out.success("Both API tokens authenticated successfully - you're good to go!")
     else:
         out.warning(
-            "One or both of your API tokens are misconfigured - fix them and run `up2ynab check` again"
+            "One or both of your API tokens are misconfigured - fix them and run `up2ynab check` again."
         )
         sys.exit(2)
