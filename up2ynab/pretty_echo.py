@@ -93,6 +93,9 @@ class EchoManager:
     def _level_echo(self, string):
         click.echo(4 * self.current_level * " " + self._format_message(string))
 
+    def _hanging_pad(self, extra):
+        return "\n" + ((self.current_level * 4) + extra) * " "
+
     def section(self, header):
         self._level_echo(_style_header(header))
         self.current_level += 1
@@ -101,36 +104,44 @@ class EchoManager:
         click.echo()
         self.current_level -= 1
 
-    def start_task(self, message):
+    def start_task(self, *message):
         if self.in_progress is not None:
             raise RuntimeError("Another task is already in progress")
-        self.in_progress = EchoInProgress(message, level=self.current_level)
+        self.in_progress = EchoInProgress(
+            self._hanging_pad(2).join(message), level=self.current_level
+        )
         self.in_progress.start()
 
-    def task_success(self, message):
+    def task_success(self, *message):
         if self.in_progress is None:
             raise RuntimeError("No task is currently in progress")
-        self.in_progress.finish(self._format_message(_style_success(message)))
+        self.in_progress.finish(
+            self._format_message(_style_success(self._hanging_pad(2).join(message)))
+        )
         self.in_progress = None
 
-    def task_error(self, message):
+    def task_error(self, *message):
         if self.in_progress is None:
             raise RuntimeError("No task is currently in progress")
-        self.in_progress.finish(self._format_message(_style_error(message)))
+        self.in_progress.finish(
+            self._format_message(_style_error(self._hanging_pad(2).join(message)))
+        )
         self.in_progress = None
 
-    def success(self, message):
-        self._level_echo(_style_success(message))
+    def success(self, *message):
+        self._level_echo(_style_success(self._hanging_pad(2).join(message)))
 
-    def error(self, message):
-        self._level_echo(_style_error(message))
+    def error(self, *message):
+        self._level_echo(_style_error(self._hanging_pad(2).join(message)))
 
-    def warning(self, message):
-        self._level_echo(_style_warning(message))
+    def warning(self, *message):
+        self._level_echo(_style_warning(self._hanging_pad(2).join(message)))
 
-    def fatal(self, message):
+    def fatal(self, *message):
         if self.in_progress is not None:
             self.in_progress.pause()
         self.current_level = 0
         click.echo()
-        click.echo(self._format_message(_style_fatal(message)))
+        click.echo(
+            self._format_message(_style_fatal(self._hanging_pad(2).join(message)))
+        )

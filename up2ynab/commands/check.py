@@ -57,17 +57,17 @@ def check(up_api_token, ynab_api_token):
 
     # Display the results
     if up_authenticated is None or ynab_authenticated is None:
-        # TODO: better multiline/wrapping handling
-        out.error("One or both of your API tokens were not provided.")
         out.error(
-            "Either use the --up-api-token/--ynab-api-token flags, or\n"
-            + "  set the UP_API_TOKEN/YNAB_API_TOKEN environment variables."
+            "One or both of your API tokens were not provided.",
+            "Either use the --up-api-token/--ynab-api-token flags,",
+            "or set the UP_API_TOKEN/YNAB_API_TOKEN environment variables.",
         )
         sys.exit(1)
     elif up_authenticated and ynab_authenticated:
         out.success("Both API tokens authenticated successfully - you're good to go!")
     else:
         out.warning(
-            "One or both of your API tokens are misconfigured - fix them and run `up2ynab check` again."
+            "One or both of your API tokens are misconfigured.",
+            "Fix them and run `up2ynab check` again.",
         )
         sys.exit(2)
