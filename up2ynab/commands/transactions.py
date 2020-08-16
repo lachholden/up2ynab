@@ -38,7 +38,15 @@ import up2ynab.pretty_echo as pe
     show_default=True,
 )
 def transactions(days, up_api_token, ynab_api_token, ynab_account_name):
-    """Import your Up transactions into YNAB."""
+    """Import your Up transactions into YNAB.
+    
+    The environment variables UP_API_TOKEN, YNAB_API_TOKEN, and YNAB_ACCOUNT_NAME can be
+    used for configuration as an alternative to their corresponding options specified
+    below.
+    
+    Setting these variables in your ~/.bashrc or similar is the recommended way to setup
+    this CLI for general use - just make sure to keep them secret!
+    """
 
     out = pe.EchoManager()
     out.section(f"Checking the last *{days} days* of transactions")

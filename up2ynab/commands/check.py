@@ -22,7 +22,14 @@ import up2ynab.pretty_echo as pe
     help="Your personal access token for the YNAB API.",
 )
 def check(up_api_token, ynab_api_token):
-    """Check your Up and YNAB API tokens are configured correctly."""
+    """Check your Up and YNAB API tokens are configured correctly.
+    
+    The API tokens can be set by the environment variables UP_API_TOKEN and
+    YNAB_API_TOKEN as an alternative to passing the below options to each command.
+
+    Setting these variables in your ~/.bashrc or similar is the recommended way to setup
+    this CLI for general use - just make sure to keep them secret!
+    """
 
     out = pe.EchoManager()
     out.section("Checking your API tokens")
