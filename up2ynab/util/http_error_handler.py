@@ -19,25 +19,28 @@ def handle_http_errors(f):
 
             if code >= 500:
                 out.fatal(
-                    "An internal server error occurred requesting the URL",
-                    e.response.url,
+                    "An internal server error occurred requesting the following URL:",
+                    f"  *{e.request.method}* `{e.response.url}`",
                 )
                 ctx.exit(2)
             elif code == 401:
                 out.fatal(
-                    "An authentication error occurred accessing one of the APIs.",
+                    "An authentication error occurred accessing the API at the following URL:",
+                    f"  *{e.request.method}* `{e.response.url}`",
                     "Please run `up2ynab check` to help fix this problem.",
                 )
                 ctx.exit(2)
             elif code == 421:
                 out.fatal(
-                    "The rate limit has been exceeded for one of the APIs.",
+                    "The rate limit has been exceeded for the API at the following URL:",
+                    f"  *{e.request.method}* `{e.response.url}`",
                     "Please wait before trying again.",
                 )
                 ctx.exit(2)
             else:
                 out.fatal(
-                    f"Accessing one of the APIs resulted in an unexpected HTTP {code} error."
+                    f"Accessing the API at the following URL resulted in an unexpected HTTP {code} error:"
+                    f"  *{e.request.method}* `{e.response.url}`",
                 )
                 ctx.exit(2)
 
