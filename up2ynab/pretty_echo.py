@@ -21,6 +21,9 @@ def _style_success(string):
 def _style_error(string):
     return click.style('✗ ', fg='red') + string
 
+def _style_warning(string):
+    return click.style('! ', fg='yellow') + string
+
 def _style_fatal(string):
     return click.style('✗ ', fg='bright_red') + click.style(string, fg='red')
 
@@ -100,6 +103,9 @@ class EchoManager:
     
     def error(self, message):
         self._level_echo(_style_error(message))
+    
+    def warning(self, message):
+        self._level_echo(_style_warning(message))
     
     def fatal(self, message):
         if self.in_progress is not None:

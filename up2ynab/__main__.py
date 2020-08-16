@@ -11,6 +11,37 @@ def cli():
     pass
 
 @click.command()
+@click.option('--up-api-token', required=True, envvar='UP_API_TOKEN', help='Your personal access token for the Up API.')
+def check(up_api_token):
+    """Check your Up and YNAB API tokens are configured correctly."""
+
+    out = pe.EchoManager()
+    out.section('Checking your API tokens')
+
+    out.start_task('Checking your Up API token...')
+    up_client = up_api.UpClient(up_api_token)
+    up_authenticated = up_client.is_authenticated()
+    if up_authenticated:
+        out.task_success('Your Up API token is working')
+    else:
+        out.task_error('Your Up API token returned an authentication error')
+    
+    out.start_task('Checking your YNAB token...')
+    ynab_authenticated = True # TODO
+    if ynab_authenticated:
+        out.task_success('Your YNAB API token is working')
+    else:
+        out.task_error('Your YNAB API token returned an authentication error')
+    
+    out.end_section()
+
+    if up_authenticated and ynab_authenticated:
+        out.success('Both API tokens authenticated successfully - you\'re good to go!')
+    else:
+        out.warning('One or both of your API tokens are misconfigured - check them and try again')
+        sys.exit(1)
+
+@click.command()
 @click.option('-d', '--days', default=14, help='Number of days before today (inclusive) to find transactions.')
 @click.option('--up-api-token', required=True, envvar='UP_API_TOKEN', help='Your personal access token for the Up API.')
 def transactions(days, up_api_token):
@@ -34,5 +65,6 @@ def transactions(days, up_api_token):
     out.success('Imported 13 new transactions in 2.56 seconds.')
 
 
+cli.add_command(check)
 cli.add_command(transactions)
 cli()

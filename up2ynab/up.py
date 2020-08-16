@@ -14,6 +14,18 @@ class UpClient:
         """Use requests.get to get data from the specified Up API endpoint."""
         return requests.get(UpClient.up_url(endpoint), headers=self.headers, **kwargs)
     
+    def is_authenticated(self):
+        r = self.up_get('/util/ping')
+
+        # 401 means not authenticated properly, 200 means good to go
+        if r.status_code == 401:
+            return False
+        elif r.status_code == 200:
+            return True
+        
+        # if it's neither 200 nor 401, raise it as an error
+        r.raise_for_status()
+    
     def get_transactions(self):
         # TODO: calculate the real date
         r = self.up_get('/transactions', params={'filter[since]': '2020-08-01T01:02:03+10:00'})
