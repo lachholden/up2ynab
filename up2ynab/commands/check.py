@@ -9,26 +9,38 @@ import up2ynab.pretty_echo as pe
 
 
 @click.command()
-@click.option(
-    "--up-api-token",
-    required=False,  # want to bypass click's default handling if not present
-    envvar="UP_API_TOKEN",
-    help="Your personal access token for the Up API.",
-)
-@click.option(
-    "--ynab-api-token",
-    required=False,  # want to bypass click's default handling if not present
-    envvar="YNAB_API_TOKEN",
-    help="Your personal access token for the YNAB API.",
-)
-def check(up_api_token, ynab_api_token):
-    """Check your Up and YNAB API tokens are configured correctly.
-    
-    The API tokens can be set by the environment variables UP_API_TOKEN and
-    YNAB_API_TOKEN as an alternative to passing the below options to each command.
+@click.pass_context
+def check(ctx):
+    """Check that your API tokens are configured correctly.
 
-    Setting these variables in your ~/.bashrc or similar is the recommended way to setup
-    this CLI for general use - just make sure to keep them secret!
+    To get your Up API token, visit the following page:
+
+      https://api.up.com.au/getting_started
+
+    To get your YNAB API token, visit the following page:
+
+      https://app.youneedabudget.com/settings/developer
+    
+    The API tokens should be configured by setting the environment variables
+    UP_API_TOKEN and YNAB_API_TOKEN. Setting these variables in your ~/.bashrc or
+    similar is the recommended way to setup this CLI for general use, for example by
+    including:
+
+      # DO NOT MAKE THIS FILE PUBLICLY AVAILABLE
+
+      export UP_API_TOKEN=up:yeah:alonghashofnumbersandletters
+
+      export YNAB_API_TOKEN=ashorterhashofnumbersandletters
+
+    It is CRITICAL that you do not make your API keys publicly available. If you version
+    control your config files, consider exporting your tokens in a separate file (e.g.
+    ~/.up2ynab) ignored by version control that you source as part of your shell
+    configuration.
+
+    Alternatively, the options --up-api-token and --ynab-api-token can be used *before*
+    the subcommand to specify the tokens at runtime, e.g.:
+
+      $ up2ynab --up-api-token xxxx --ynab-api-token xxxx check
     """
 
     out = pe.EchoManager()
@@ -37,8 +49,8 @@ def check(up_api_token, ynab_api_token):
     # Check the Up API token
     up_authenticated = None
     out.start_task("Checking your Up API token...")
-    if up_api_token is not None:
-        up_client = up_api.UpClient(up_api_token)
+    if ctx.obj["up_token"] is not None:
+        up_client = up_api.UpClient(ctx.obj["up_token"])
         up_authenticated = up_client.is_authenticated()
         if up_authenticated:
             out.task_success("Your Up API token is working.")
@@ -50,8 +62,8 @@ def check(up_api_token, ynab_api_token):
     # Check the YNAB API token
     ynab_authenticated = None
     out.start_task("Checking your YNAB token...")
-    if ynab_api_token is not None:
-        ynab_client = ynab_api.YNABClient(ynab_api_token)
+    if ctx.obj["ynab_token"] is not None:
+        ynab_client = ynab_api.YNABClient(ctx.obj["ynab_token"])
         ynab_authenticated = ynab_client.is_authenticated()
         if ynab_authenticated:
             out.task_success("Your YNAB API token is working.")

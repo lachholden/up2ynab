@@ -18,18 +18,6 @@ import up2ynab.pretty_echo as pe
     required=True,
 )
 @click.option(
-    "--up-api-token",
-    required=True,
-    envvar="UP_API_TOKEN",
-    help="Your personal access token for the Up API.",
-)
-@click.option(
-    "--ynab-api-token",
-    required=True,
-    envvar="YNAB_API_TOKEN",
-    help="Your personal access token for the YNAB API.",
-)
-@click.option(
     "--ynab-account-name",
     required=True,
     envvar="YNAB_ACCOUNT_NAME",
@@ -37,27 +25,31 @@ import up2ynab.pretty_echo as pe
     default="Up Spending",
     show_default=True,
 )
-def transactions(days, up_api_token, ynab_api_token, ynab_account_name):
+@click.pass_context
+def transactions(ctx, days, ynab_account_name):
     """Import your Up transactions into YNAB.
     
-    The environment variables UP_API_TOKEN, YNAB_API_TOKEN, and YNAB_ACCOUNT_NAME can be
-    used for configuration as an alternative to their corresponding options specified
-    below.
+    Make sure your API tokens are setup correctly! Recommended use is by setting the
+    environment variables UP_API_TOKEN and YNAB_API_TOKEN. You can check they are
+    configured properly by running
+
+      $ up2ynab check
     
-    Setting these variables in your ~/.bashrc or similar is the recommended way to setup
-    this CLI for general use - just make sure to keep them secret!
+    For more information about setting the tokens, view
+
+      $ up2ynab check --help
     """
 
     out = pe.EchoManager()
     out.section(f"Checking the last *{days} days* of transactions")
 
     out.start_task("Fetching transactions from Up...")
-    up_client = up_api.UpClient(up_api_token)
+    up_client = up_api.UpClient(ctx.obj["up_token"])
     tx_count = len(up_client.get_transactions())
     out.task_success(f"Fetched the *{tx_count} transactions* from Up.")
 
     out.start_task(f"Fetching the Up account ID in YNAB...")
-    ynab_client = ynab_api.YNABClient(ynab_api_token)
+    ynab_client = ynab_api.YNABClient(ctx.obj["ynab_token"])
     account_id = None
     try:
         account_id = ynab_client.account_id_from_name(ynab_account_name)
