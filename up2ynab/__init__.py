@@ -42,8 +42,8 @@ def check(up_api_token):
         sys.exit(1)
 
 @click.command()
-@click.option('-d', '--days', default=14, help='Number of days before today (inclusive) to find transactions.')
-@click.option('--up-api-token', required=True, envvar='UP_API_TOKEN', help='Your personal access token for the Up API.')
+@click.option('-d', '--days', default=14, help='Number of days before today (inclusive) to find transactions.', show_default=True)
+@click.option('--up-api-token', required=True, envvar='UP_API_TOKEN', help='Your personal access token for the Up API.', )
 def transactions(days, up_api_token):
     """Import your Up transactions into YNAB."""
 
