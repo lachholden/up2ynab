@@ -1,4 +1,9 @@
 import requests
+from collections import namedtuple
+
+YNABTransaction = namedtuple(
+    "YNABTransaction", ("date", "amount", "payee_name", "import_id")
+)
 
 
 class YNABClient:
@@ -28,3 +33,18 @@ class YNABClient:
 
         # if it's neither 200 nor 401, raise it as an error
         r.raise_for_status()
+
+    def account_id_from_name(self, name):
+        r = self.ynab_get("/budgets/last-used/accounts")
+        r.raise_for_status()
+
+        matching_ids = [
+            acc["id"] for acc in r.json()["data"]["accounts"] if acc["name"] == name
+        ]
+
+        if len(matching_ids) == 0:
+            raise ValueError(f"no accounts found for name {name}")
+        elif len(matching_ids) > 1:
+            raise ValueError(f"more than one account found for {name}")
+        else:
+            return matching_ids[0]
