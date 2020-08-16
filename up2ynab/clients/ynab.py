@@ -48,3 +48,21 @@ class YNABClient:
             raise ValueError(f"more than one account found for {name}")
         else:
             return matching_ids[0]
+
+    def create_transactions(self, account_id, transactions):
+        """Create the YNABTransactions in the account with the specified ID.
+        
+        Returns a 2-tuple of (created_tx_ids, duplicate_import_ids).
+        """
+        transactions_data = [
+            {**tx._asdict(), "account_id": account_id} for tx in transactions
+        ]
+
+        r = requests.post(
+            YNABClient.ynab_url("/budgets/last-used/transactions"),
+            headers=self.headers,
+            json={"transactions": transactions_data},
+        )
+        r.raise_for_status()
+        json_data = r.json()["data"]
+        return (json_data["transaction_ids"], json_data["duplicate_import_ids"])

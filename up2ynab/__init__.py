@@ -36,6 +36,7 @@ def cli(ctx, up_api_token, ynab_api_token):
     }
 
 
-cli.add_command(check)
-cli.add_command(transactions)
-cli(obj={})
+if __name__ == "__main__":
+    cli.add_command(check)
+    cli.add_command(transactions)
+    cli(obj={})
