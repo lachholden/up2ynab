@@ -24,7 +24,7 @@ class UpClient:
         elif r.status_code == 200:
             return True
 
-        # if it's neither 200 nor 401, raise it as an error
+        # If it's neither 200 nor 401, raise it as an error
         r.raise_for_status()
 
     def get_transactional_account_id(self):
@@ -53,8 +53,8 @@ class UpClient:
         json_response = r.json()
         transactions_json = json_response["data"]
 
-        # keep following the 'next' links and retrieving the data until all the transactions are
-        # retrieved
+        # Keep following the 'next' links and retrieving the data until all the
+        # transactions are retrieved
         while json_response["links"]["next"] is not None:
             r = requests.get(json_response["links"]["next"], headers=self.headers)
             r.raise_for_status()

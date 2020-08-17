@@ -19,7 +19,7 @@ class YNABTransaction(_YNABTransactionBase):
 
         date = datetime.datetime.fromisoformat(transaction["attributes"]["createdAt"])
 
-        # convert from cents to millidollars
+        # Convert from cents to millidollars
         amount = transaction["attributes"]["amount"]["valueInBaseUnits"] * 10
 
         payee_name = transaction["attributes"]["description"]
@@ -28,10 +28,17 @@ class YNABTransaction(_YNABTransactionBase):
 
         is_foreign = transaction["attributes"]["foreignAmount"] is not None
 
-        # even if it's pending, Up counts it as part of the available value
+        # Even if it's pending, Up counts it as part of the available value
         is_cleared = True
 
-        return cls(date.date().isoformat(), amount, payee_name, import_id, is_foreign)
+        return cls(
+            date.date().isoformat(),
+            amount,
+            payee_name,
+            import_id,
+            is_foreign,
+            is_cleared,
+        )
 
 
 class YNABClient:
@@ -59,7 +66,7 @@ class YNABClient:
         elif r.status_code == 200:
             return True
 
-        # if it's neither 200 nor 401, raise it as an error
+        # If it's neither 200 nor 401, raise it as an error
         r.raise_for_status()
 
     def account_id_from_name(self, name):

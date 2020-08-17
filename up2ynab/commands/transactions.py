@@ -59,21 +59,21 @@ def transactions(ctx, days, ynab_account_name, flag_foreign):
       $ up2ynab check --help
     """
 
-    # get the context-provided echo manager for printing output
+    # Get the context-provided echo manager for printing output
     out = ctx.obj["echo_manager"]
 
-    # fetch the current time, to print the execution time at the end of the script
+    # Fetch the current time, to print the execution time at the end of the script
     start_time = time.perf_counter()
 
     out.section(f"Checking the last *{days} days* of transactions")
 
-    # display the selected foreign currency flag, if one has been selected
+    # Display the selected foreign currency flag, if one has been selected
     if flag_foreign is not None:
         out.info(f"Any foreign currency transactions will be flagged *{flag_foreign}*.")
 
     out.start_task("Fetching the Up transactional account ID...")
 
-    # create the Up client and try to get the ID of the transactional account
+    # Create the Up client and try to get the ID of the transactional account
     up_client = up_api.UpClient(ctx.obj["up_token"])
     try:
         up_client.get_transactional_account_id()
@@ -83,14 +83,14 @@ def transactions(ctx, days, ynab_account_name, flag_foreign):
         sys.exit(2)
     out.task_success("Fetched the Up transactional account ID.")
 
-    # fetch the transactions from Up from the past proved number of days using the
+    # Fetch the transactions from Up from the past proved number of days using the
     # client
     out.start_task("Fetching transactions from Up...")
     transactions = up_client.get_transactions(
         datetime.datetime.now() - datetime.timedelta(days=days)
     )
 
-    # convert the transaction data to the format required by the YNAB client
+    # Convert the transaction data to the format required by the YNAB client
     ynab_transactions = [
         ynab_api.YNABTransaction.from_up_transaction_data(tx) for tx in transactions
     ]
@@ -99,7 +99,7 @@ def transactions(ctx, days, ynab_account_name, flag_foreign):
 
     out.start_task("Fetching the Up account ID in YNAB...")
 
-    # create the YNAB client and try to get the ID of the up account
+    # Create the YNAB client and try to get the ID of the up account
     ynab_client = ynab_api.YNABClient(ctx.obj["ynab_token"])
     account_id = None
     try:
@@ -112,7 +112,7 @@ def transactions(ctx, days, ynab_account_name, flag_foreign):
 
     out.start_task("Uploading the transactions to YNAB...")
 
-    # import the transactions to YNAB via the client
+    # Import the transactions to YNAB via the client
     ids = ynab_client.create_transactions(account_id, ynab_transactions)
     out.task_success(
         f"Uploaded *{len(transactions)-len(ids)} new transactions* to YNAB."
@@ -121,10 +121,10 @@ def transactions(ctx, days, ynab_account_name, flag_foreign):
 
     out.end_section()
 
-    # calculate the execution time
+    # Calculate the execution time
     time_delta = time.perf_counter() - start_time
 
-    # display the final script result
+    # Display the final script result
     out.success(
         f"Imported *{len(transactions)-len(ids)} new transactions* in {time_delta:.2f} seconds."
     )
