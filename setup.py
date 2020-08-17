@@ -9,7 +9,7 @@ with open(path.join(this_directory, "README.md"), encoding="utf-8") as f:
 
 setup(
     name="up2ynab",
-    version="0.0.1.dev0",
+    version="0.0.1.dev1",
     description="CLI for synchronising the Up neobank with YNAB",
     long_description=long_description,
     long_description_content_type="text/markdown",
