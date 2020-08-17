@@ -21,16 +21,32 @@ from up2ynab.util.http_error_handler import handle_http_errors
 )
 @click.option(
     "--ynab-account-name",
+    "-a",
     required=True,
     envvar="YNAB_ACCOUNT_NAME",
-    help="The name of your Up spending account in YNAB.",
+    help="The name of your Up spending account in YNAB."
+    + " Can also be set by YNAB_ACCOUNT_NAME environment variable.",
     default="Up Spending",
     show_default=True,
 )
+@click.option(
+    "--flag-foreign",
+    "-ff",
+    required=False,
+    envvar="YNAB_FOREIGN_TRANSACTION_FLAG",
+    help="The coloured flag in YNAB to apply to transactions in a foreign currency."
+    + " Can also be set by YNAB_FOREIGN_TRANSACTION_FLAG environment variable.",
+    type=click.Choice(
+        ["red", "orange", "yellow", "green", "blue", "purple"], case_sensitive=False
+    ),
+)
 @click.pass_context
 @handle_http_errors
-def transactions(ctx, days, ynab_account_name):
-    """Import your Up transactions (transactional account only) into YNAB.
+def transactions(ctx, days, ynab_account_name, flag_foreign):
+    """Import your Up transactions into YNAB.
+
+    This command only imports transactions from the transactional account in Up, not
+    from any Savers.
     
     Make sure your API tokens are setup correctly! Recommended use is by setting the
     environment variables UP_API_TOKEN and YNAB_API_TOKEN. You can check they are
@@ -48,6 +64,9 @@ def transactions(ctx, days, ynab_account_name):
     start_time = time.perf_counter()
 
     out.section(f"Checking the last *{days} days* of transactions")
+    if flag_foreign is not None:
+        # TODO: actually apply flag
+        out.info(f"Any foreign currency transactions will be flagged *{flag_foreign}*.")
     out.start_task("Fetching the Up transactional account ID...")
     up_client = up_api.UpClient(ctx.obj["up_token"])
     try:

@@ -23,9 +23,9 @@ def check(ctx):
       https://app.youneedabudget.com/settings/developer
     
     The API tokens should be configured by setting the environment variables
-    UP_API_TOKEN and YNAB_API_TOKEN. Setting these variables in your ~/.bashrc or
-    similar is the recommended way to setup this CLI for general use, for example by
-    including:
+    UP_API_TOKEN and YNAB_API_TOKEN. Setting these variables in your ~/.bash_profile,
+    ~/.zshenv, or similar is the recommended way to setup this CLI for general use, for
+    example by including:
 
       # DO NOT MAKE THIS FILE PUBLICLY AVAILABLE
 
