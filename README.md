@@ -15,6 +15,12 @@ First, make sure you have Python 3 installed. Then, install this tool from PyPI:
 $ pip install up2ynab
 ```
 
+If you get a SSLError when you try to use the program, you might need to also run
+```shell
+$ pip install certifi
+```
+but this *should* be done automatically as part of the above command.
+
 ## 🛠 Configuration
 You'll need your API tokens for both Up and YNAB for this program to work.
 
