@@ -3,7 +3,8 @@ from collections import namedtuple
 import datetime
 
 _YNABTransactionBase = namedtuple(
-    "YNABTransactionBase", ("date", "amount", "payee_name", "import_id", "is_foreign")
+    "YNABTransactionBase",
+    ("date", "amount", "payee_name", "import_id", "is_foreign", "is_cleared"),
 )
 
 
@@ -26,6 +27,9 @@ class YNABTransaction(_YNABTransactionBase):
         import_id = f"up0:{transaction['id'].replace('-', '')}"
 
         is_foreign = transaction["attributes"]["foreignAmount"] is not None
+
+        # even if it's pending, Up counts it as part of the available value
+        is_cleared = True
 
         return cls(date.date().isoformat(), amount, payee_name, import_id, is_foreign)
 
@@ -89,6 +93,7 @@ class YNABClient:
                 "import_id": tx.import_id,
                 "flag": (foreign_flag if tx.is_foreign else None),
                 "account_id": account_id,
+                "cleared": ("cleared" if tx.is_cleared else "uncleared"),
             }
             for tx in transactions
         ]
