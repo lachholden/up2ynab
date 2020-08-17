@@ -1,9 +1,33 @@
 import requests
 from collections import namedtuple
+import datetime
 
-YNABTransaction = namedtuple(
-    "YNABTransaction", ("date", "amount", "payee_name", "import_id")
+_YNABTransactionBase = namedtuple(
+    "YNABTransactionBase", ("date", "amount", "payee_name", "import_id", "is_foreign")
 )
+
+
+class YNABTransaction(_YNABTransactionBase):
+    @classmethod
+    def from_up_transaction_data(cls, transaction):
+        """Create a YNABTransaction from Up API transaction data.
+    
+        transaction should be the dict representation of the JSON data representing a 
+        single transaction from the Up API.
+        """
+
+        date = datetime.datetime.fromisoformat(transaction["attributes"]["createdAt"])
+
+        # convert from cents to millidollars
+        amount = transaction["attributes"]["amount"]["valueInBaseUnits"] * 10
+
+        payee_name = transaction["attributes"]["description"]
+
+        import_id = f"up0:{transaction['id'].replace('-', '')}"
+
+        is_foreign = transaction["attributes"]["foreignAmount"] is not None
+
+        return cls(date.date().isoformat(), amount, payee_name, import_id, is_foreign)
 
 
 class YNABClient:
@@ -49,13 +73,24 @@ class YNABClient:
         else:
             return matching_ids[0]
 
-    def create_transactions(self, account_id, transactions):
-        """Create the YNABTransactions in the account with the specified ID.
+    def create_transactions(self, account_id, transactions, foreign_flag=None):
+        """Create the provided YNABTransactions in the account with the specified ID.
+
+        foreign_flag is the colour of the flag that should be set for transactions in a
+        foreign currency.
         
         Returns a list of IDs that had already been imported.
         """
         transactions_data = [
-            {**tx._asdict(), "account_id": account_id} for tx in transactions
+            {
+                "date": tx.date,
+                "amount": tx.amount,
+                "payee_name": tx.payee_name,
+                "import_id": tx.import_id,
+                "flag": (foreign_flag if tx.is_foreign else None),
+                "account_id": account_id,
+            }
+            for tx in transactions
         ]
 
         r = requests.post(
