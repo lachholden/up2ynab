@@ -1,5 +1,11 @@
 # 💰⚡️ up2ynab
 
+[![PyPI](https://img.shields.io/pypi/v/up2ynab)](https://pypi.org/project/up2ynab)
+![PyPI - License](https://img.shields.io/pypi/l/up2ynab)
+![PyPI - Status](https://img.shields.io/pypi/status/up2ynab)
+![PyPI - Python Version](https://img.shields.io/pypi/pyversions/up2ynab)
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+
 A command-line interface for integrating the Australian neobank [Up](https://up.com.au) with
 the budgeting platform [You Need A Budget](https://www.youneedabudget.com).
 
